@@ -1,4 +1,17 @@
 <script src="https://cdn.socket.io/socket.io-1.2.1.js"></script>
 <script>
-  var socket = io.connect('http://127.0.0.1:2424');
+    var socket = io.connect('http://127.0.0.1:2424');
+    socket.emit('request_grid');
+    socket.on('receive_grid', function(data){
+        console.log(data.rows, data.cols);
+        socket.emit('request_playing');
+    });
+    socket.on('receive_status', function(data){
+        console.log(data);        
+    });
+
+    socket.on('notice', function(data){
+        console.log(data);        
+    });
+
 </script>
