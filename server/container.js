@@ -9,6 +9,9 @@ var Game = function (rows, cols){
     this.cols = cols;
     this.players = [];
     this.grid = [[],[]];
+    this.triggers = {
+        'onPlayerDead': function(){},
+    };
     
     for (r=0;r<rows;r++){
         this.grid[r] = [];
@@ -68,6 +71,7 @@ var Game = function (rows, cols){
             }
             if (this.checkCollision(newPos)){
                 // Player will die
+                this.triggers['onPlayerDead'](cur);           
                 continue;
             }
             //console.log(cur.socket.id, ' moving ', newPos);
@@ -101,6 +105,10 @@ var Game = function (rows, cols){
             }
             console.log(p);
         }
+    }
+
+    this.on = function(on, callback){
+        this.triggers[on] = callback.bind(this);
     }
 
 }

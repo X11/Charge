@@ -3,6 +3,10 @@ var io = require('socket.io').listen(2424);
 var Container = require('./container.js');
 var game = new Container.Make(40, 40);
 
+game.on('onPlayerDead', function(player){
+    //console.log(this.players);
+});
+
 io.sockets.on('connection', function(socket){
     
     console.log('Socket connected');
@@ -18,7 +22,8 @@ io.sockets.on('connection', function(socket){
     socket.on('request_playing', function(){
         if (game.players.length < 3) {
             console.log(this.id + ' inserted into game queue');
-            game.players.push(new Container.Player({socket:this}));
+            var player = new Container.Player({socket:this});
+            game.players.push(player);
             this.emit('receive_status', {status: 'waiting'});
         } else {
             console.log(this.id + ' denied from game queue');
@@ -34,7 +39,7 @@ io.sockets.on('connection', function(socket){
 
 });
 
-var refresh_rate = 60;
+var refresh_rate = 100;
 var refresh_timer = null;
 var checkForStart = setInterval(function(){
     if (game.players.length > 1){
