@@ -1,25 +1,31 @@
 
+var colors = [
+    'red',
+    'blue',
+    'green',
+]
+
 var Tile = function(value){
     this.value = value;
 }
 
 var Game = function (rows, cols){
-    
+    var self = this;   
     this.rows = rows;
     this.cols = cols;
     this.players = [];
     this.grid = [[],[]];
     this.triggers = {
         'onPlayerDead': function(){},
+        'onGameStart': function(){},
+        'onGameEnd': function(){},
     };
+    this.playing = false;
     
     for (r=0;r<rows;r++){
         this.grid[r] = [];
         for (c=0;c<cols;c++){
-            if (r == 0 || r == rows-1 || c == 0 || c == cols-1)
-                this.grid[r][c] = new Tile('wall');
-            else
-                this.grid[r][c] = new Tile('empty');
+            this.grid[r][c] = new Tile('empty');
         }
     }
     
@@ -30,9 +36,36 @@ var Game = function (rows, cols){
         return false;
     }
 
+    this.removePlayer = function(id){
+        var index = null;
+        for (i in this.players)
+            if (this.players[i].socket.id == id)
+                index = i;
+        if (index)
+            return this.players.splice(i, 1);
+        return false;
+    }
+
     this.start = function(){
         var i;
         var l = this.players.length;
+        var needUpdate = {tile:[]};
+        
+        for (r=0;r<this.rows;r++){
+            for (c=0;c<this.cols;c++){
+                var old = this.grid[r][c].value;
+                if (r == 0 || r == this.rows-1 || c == 0 || c == this.cols-1)
+                    this.grid[r][c].value = 'wall';
+                else
+                    this.grid[r][c].value = 'empty';
+                needUpdate.tile.push({
+                    row : r,
+                    col : c,
+                    value : this.grid[r][c].value 
+                });
+            }
+        }
+
         for (i=0;i<l;i++){
             var cur = this.players[i];
             if (l == 3 && i == 0){
@@ -46,13 +79,32 @@ var Game = function (rows, cols){
                 cur.x = Math.floor(this.rows/3*2);
                 cur.y = Math.floor(this.rows/3*(i+add));
             }
+            cur.alive = true;
+            cur.color = colors[i];
             this.grid[cur.x][cur.y].value = cur.socket.id;
         }
+
+        this.playing = true;
+        for (i in this.players){
+            this.players[i].socket.emit('receive_identifier', {color: this.players[i].color});
+            this.players[i].socket.emit('receive_status', {status: 'countdown'});
+            this.players[i].socket.emit('updateTiles', needUpdate);
+        }
+
+        setTimeout(function(){
+            self.triggers['onGameStart']();           
+            for (i in self.players){
+                self.players[i].socket.emit('receive_status', {status: 'started'});
+            }
+        }, 3000);
     }
 
     this.move = function(){
+        var needUpdate = {tile:[]};
         for (i in this.players){
             var cur = this.players[i];
+            if (cur.alive == false) continue;
+
             var newPos = [cur.x, cur.y];
             var currentTile = this.grid[cur.x][cur.y];
             switch(cur.dir){
@@ -71,21 +123,52 @@ var Game = function (rows, cols){
             }
             if (this.checkCollision(newPos)){
                 // Player will die
-                this.triggers['onPlayerDead'](cur);           
+                cur.alive = false;
+                this.triggers['onPlayerDead'](cur);
                 continue;
             }
-            //console.log(cur.socket.id, ' moving ', newPos);
+            console.log(cur.socket.id, ' moving ', newPos);
             currentTile.value = 'wall';
+            needUpdate.tile.push({
+                row:    cur.x,
+                col:    cur.y,
+                value:  currentTile.value,
+            });
             cur.x = newPos[0];
             cur.y = newPos[1];
-            this.grid[cur.x][cur.y].value = cur.socket.id;
+            this.grid[cur.x][cur.y].value = cur.color;
+            needUpdate.tile.push({
+                row:    cur.x,
+                col:    cur.y,
+                value:  cur.color,
+            });
         }
+        for (i in this.players){
+            this.players[i].socket.emit('updateTiles', needUpdate);
+        }
+        this.checkGame();
     }
 
     this.checkCollision = function(pos){
         if(this.grid[pos[0]][pos[1]].value == 'empty')
             return false;
         return true;
+    }
+
+    this.checkGame = function(){
+        // check playeras
+        var alive = [];
+        for (i in this.players)
+            if (this.players[i].alive)
+                alive.push(1);
+
+        if (alive.length <= 1){
+            this.playing = false;
+            for (i in this.players){
+                this.players[i].socket.emit('receive_status', {status: 'ended'});
+            }
+            this.triggers['onGameEnd']();
+        }
     }
 
     this.print = function(){
@@ -98,6 +181,15 @@ var Game = function (rows, cols){
                         break;
                     case 'wall':
                         p += 'X';
+                        break;
+                    case 'red':
+                        p += '\033[44m0\033[0m';
+                        break;
+                    case 'blue':
+                        p += '\033[43m0\033[0m';
+                        break;
+                    case 'green':
+                        p += '\033[42m0\033[0m';
                         break;
                     default:
                         p+= '0';
@@ -114,10 +206,17 @@ var Game = function (rows, cols){
 }
 
 function Player(options){
+    var self = this;
     this.x = 0;
     this.y = 0;
+    this.color = '';
     this.dir = 'N';
+    this.alive = false;
     this.socket = options.socket;
+
+    this.socket.on('changeDirection', function(data){
+        self.dir = data.direction;
+    });
 }
 
 module.exports.Make = Game;

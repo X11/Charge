@@ -1,17 +1,82 @@
+<style>
+div, p {margin:0;padding:0;}
+div {display:table;}
+p {float:left;width:10px;height:10px;display:block;background:red;}
+</style>
 <script src="https://cdn.socket.io/socket.io-1.2.1.js"></script>
 <script>
-    var socket = io.connect('http://127.0.0.1:2424');
+    var socket = io.connect('http://172.17.51.96:2424');
+    var status = '';
+    var dir = 'N';
     socket.emit('request_grid');
     socket.on('receive_grid', function(data){
         console.log(data.rows, data.cols);
+        var r;
+        for (r=0;r<data.rows;r++){
+            var c;
+            var row = document.createElement('div');
+            for (c=0;c<data.cols;c++){
+                row.appendChild(document.createElement('p'));
+            }
+            document.body.appendChild(row);
+        }
         socket.emit('request_playing');
     });
+    socket.on('receive_identifier', function(data){
+        console.log(data.color);
+    });
+    socket.on('updateTiles', function(data){
+        console.log(data);
+        for (i in data.tile){
+            //
+        }
+    });
+ 
     socket.on('receive_status', function(data){
-        console.log(data);        
+        status = data.status || '';
+        switch(status){
+            case 'waiting':
+                break;
+            case 'started':
+                break;
+            case 'ended':
+                break;
+            case 'countdown':
+                break;
+            default:
+                break;
+        }
+        console.log(status);
     });
 
     socket.on('notice', function(data){
         console.log(data);        
     });
+    
+    document.onkeydown = function(e){
+        if (status == 'started'){
+            var directionUpdate = dir;
+            switch(e.keyCode){
+                // <
+                case 37:
+                    directionUpdate = 'W';
+                    break;
+                // up
+                case 38:
+                    directionUpdate = 'N';
+                    break;
+                // >
+                case 39:
+                    directionUpdate = 'E';
+                    break;
+                case 40:
+                    directionUpdate = 'S';
+                    break;
+                default:
+                    console.log(e.keyCode);
+            }
+            socket.emit('changeDirection', {direction: directionUpdate});
+        }
+    };
 
 </script>

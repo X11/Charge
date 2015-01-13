@@ -1,0 +1,145 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Charge</title>
+    <style>
+* {margin:0;padding:0;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box;}
+        header {width:100%;text-align:center; margin:10px;}
+        header > h1,
+        header > h2 {margin:10px;}
+        header > a { text-decoration:none; font-weight:bold; background:#000; color:#fff;padding:5px 10px; }
+        .area {display:block;}
+        .row {display:table;margin:0 auto;}
+        .col {float:left;display:block;height:10px;width:10px;background:black;}
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>CHARGE</h1>
+        <h2 class="status">CONNECTING..</h2>
+        <a class='connect' href="#">REQUEST TO PLAY</a>
+    </header>
+    <div class="area">
+    
+    </div>
+    <script src="https://cdn.socket.io/socket.io-1.2.1.js"></script>
+    <script>
+    var settings = {};
+    settings.socket = io.connect('http://localhost:2424');
+    settings.game = new Game(settings.socket);
+    settings.status = document.querySelector('.status');
+    settings.status.innerHTML = 'CONNECTED';
+    settings.colors = {
+        'empty': 'gray',
+        'wall': 'black',
+        'red': 'red',
+        'blue': 'blue',
+        'green': 'green',
+    };
+
+
+    document.querySelector('.connect').onclick = function(e){
+        e.preventDefault();
+        settings.game.requestPlaying();
+    }
+
+    function Game(socket){
+        var self = this;
+        this.status = '';
+        this.dir = 'N';
+        this.socket = socket;
+        this.grid = [];
+        // Listen to all events
+        this.socket.on('receive_grid', function(data){
+            console.log(data.rows, data.cols);
+            var r;
+            var c;
+            for (r=0;r<data.rows;r++){
+                self.grid[r] = [];
+                var row = document.createElement('div');
+                row.classList.add('row');
+                row.classList.add('row'+r);
+                for (c=0;c<data.cols;c++){
+                    self.grid[r][c] = document.createElement('div');
+                    self.grid[r][c].classList.add('col');
+                    self.grid[r][c].classList.add('col'+c);
+                    row.appendChild(self.grid[r][c]);
+                    self.grid[r][c].style.background = settings.colors['empty'];
+                }
+                document.querySelector('.area').appendChild(row);
+            }
+        });
+
+        this.socket.on('receive_status', function(data){
+            self.status = data.status || '';
+            switch(self.status){
+                case 'waiting':
+                    break;
+                case 'started':
+                    break;
+                case 'ended':
+                    break;
+                case 'countdown':
+                    break;
+                default:
+                    break;
+            }
+            settings.status.innerHTML = self.status;
+            console.log(self.status);
+        });
+        
+
+        this.socket.on('receive_identifier', function(data){
+            document.body.style.background = data.color;
+        });
+
+        this.socket.on('updateTiles', function(data){
+            console.log(data);
+            for (var i=0;i<data.tile.length;i++){
+                var tile = data.tile[i];
+                var color = (settings.colors[tile.value]) ? settings.colors[tile.value] : 'white';
+                self.grid[tile.row][tile.col].style.background = color;
+            }
+        });
+
+
+        document.onkeydown = function(e){
+            if (self.status == 'started'){
+                var directionUpdate = self.dir;
+                switch(e.keyCode){
+                    // <
+                    case 37:
+                        directionUpdate = 'W';
+                        break;
+                    // up
+                    case 38:
+                        directionUpdate = 'N';
+                        break;
+                    // >
+                    case 39:
+                        directionUpdate = 'E';
+                        break;
+                    case 40:
+                        directionUpdate = 'S';
+                        break;
+                    default:
+                        console.log(e.keyCode);
+                }
+                self.socket.emit('changeDirection', {direction: directionUpdate});
+            }
+        }
+
+        this.requestPlaying = function(){
+            console.log(this.status);
+            if (this.status == '' || this.status == 'ended')
+                this.socket.emit('request_playing');
+        };
+
+        // Request the grid to start playing
+        this.socket.emit('request_grid');
+    }
+    </script>
+</body>
+</head>
