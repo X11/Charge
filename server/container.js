@@ -128,7 +128,8 @@ var Game = function (rows, cols){
                 continue;
             }
             console.log(cur.socket.id, ' moving ', newPos);
-            currentTile.value = 'wall';
+            //currentTile.value = 'wall';
+            currentTile.value = 'dark'+cur.color;
             needUpdate.tile.push({
                 row:    cur.x,
                 col:    cur.y,

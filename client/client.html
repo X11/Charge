@@ -4,12 +4,13 @@
     <meta charset="utf-8">
     <title>Charge</title>
     <style>
-* {margin:0;padding:0;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box;}
-        header {width:100%;text-align:center; margin:10px;}
-        header > h1,
+        * {margin:0;padding:0;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box;}
+        body {background:orange;display:block;width:100%;}
+        header {width:100%;text-align:center;margin:10px 0; font-size:20px;}
+        header > h1 {margin:10px;}
         header > h2 {margin:10px;}
-        header > a { text-decoration:none; font-weight:bold; background:#000; color:#fff;padding:5px 10px; }
-        .area {display:block;}
+        header > a { text-decoration:none; display:inline-block; font-weight:bold; background:#000; color:#fff;padding:5px 10px; }
+        .area {display:block; margin:20px 0;}
         .row {display:table;margin:0 auto;}
         .col {float:left;display:block;height:10px;width:10px;background:black;}
 
@@ -31,16 +32,33 @@
     settings.game = new Game(settings.socket);
     settings.status = document.querySelector('.status');
     settings.status.innerHTML = 'CONNECTED';
+    settings.request = document.querySelector('.connect');
     settings.colors = {
-        'empty': 'gray',
+        'empty': '#222',
         'wall': 'black',
         'red': 'red',
         'blue': 'blue',
         'green': 'green',
+        'darkred': 'darkred',
+        'darkblue': 'darkblue',
+        'darkgreen': 'darkgreen',
     };
+    settings.binds = [];
+    settings.binds[37] = 'W';
+    settings.binds[38] = 'N';
+    settings.binds[39] = 'E';
+    settings.binds[40] = 'S';
+    settings.binds[65] = 'W';
+    settings.binds[87] = 'N';
+    settings.binds[68] = 'E';
+    settings.binds[83] = 'S';
+    settings.opposite = [];
+    settings.opposite['N'] = 'S';
+    settings.opposite['S'] = 'N';
+    settings.opposite['E'] = 'W';
+    settings.opposite['W'] = 'E';
 
-
-    document.querySelector('.connect').onclick = function(e){
+    settings.request.onclick = function(e){
         e.preventDefault();
         settings.game.requestPlaying();
     }
@@ -74,19 +92,17 @@
 
         this.socket.on('receive_status', function(data){
             self.status = data.status || '';
-            switch(self.status){
-                case 'waiting':
-                    break;
-                case 'started':
-                    break;
-                case 'ended':
-                    break;
-                case 'countdown':
-                    break;
-                default:
-                    break;
-            }
-            settings.status.innerHTML = self.status;
+            if (self.status == 'ended')
+                self.status = '';
+
+            if (self.status == '' || self.status == 'ended')
+                settings.request.style.display = 'inline-block';
+            else 
+                settings.request.style.display = 'none';
+
+            if (self.status == 'countdown')
+                self.dir = 'N';
+            settings.status.innerHTML = self.status.toUpperCase();
             console.log(self.status);
         });
         
@@ -108,25 +124,11 @@
         document.onkeydown = function(e){
             if (self.status == 'started'){
                 var directionUpdate = self.dir;
-                switch(e.keyCode){
-                    // <
-                    case 37:
-                        directionUpdate = 'W';
-                        break;
-                    // up
-                    case 38:
-                        directionUpdate = 'N';
-                        break;
-                    // >
-                    case 39:
-                        directionUpdate = 'E';
-                        break;
-                    case 40:
-                        directionUpdate = 'S';
-                        break;
-                    default:
-                        console.log(e.keyCode);
-                }
+                if (settings.binds[e.keyCode])
+                    directionUpdate = settings.binds[e.keyCode];
+                if (settings.opposite[directionUpdate] == self.dir)
+                    return
+                self.dir = directionUpdate;
                 self.socket.emit('changeDirection', {direction: directionUpdate});
             }
         }
