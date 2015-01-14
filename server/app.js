@@ -5,10 +5,10 @@ io.set('origins', '*:*');
 var Container = require('./container.js');
 var game = new Container.Make(50, 50);
 game.spawnpoints = [
-[10, 10, 'S'],
-[40, 40, 'N'],
-[10, 40, 'S'],
-[40, 10, 'N'],
+    [10, 10, 'S'],
+    [40, 40, 'N'],
+    [10, 40, 'S'],
+    [40, 10, 'N'],
 ];
 
 io.sockets.on('connection', function(socket){
@@ -43,7 +43,7 @@ io.sockets.on('connection', function(socket){
 
 });
 
-var refresh_rate = 60;
+var refresh_rate = 50;
 var refresh_timer = null;
 var checkForStart = null;
 function lobbyStart(){
@@ -54,6 +54,7 @@ function lobbyStart(){
         }
     }, 5000);
 }
+
 game.on('onPlayerDead', function(player){
     console.log(player.color, 'dead');
     //console.log(this.players);

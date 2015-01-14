@@ -70,6 +70,7 @@ var Game = function (rows, cols){
 
         for (i=0;i<l;i++){
             var cur = this.players[i];
+            cur.put = 0;
             cur.x = this.spawnpoints[i][0];
             cur.y = this.spawnpoints[i][1];
             cur.dir = this.spawnpoints[i][2];
@@ -123,12 +124,17 @@ var Game = function (rows, cols){
             if (this.checkCollision(newPos)){
                 // Player will die
                 cur.alive = false;
+                cur.socket.emit('receive_status', {status: 'dead'});
                 this.triggers['onPlayerDead'](cur);
                 continue;
             }
+            cur.put++;
             console.log(cur.socket.id, ' moving ', newPos);
             //currentTile.value = 'wall';
-            currentTile.value = 'dark'+cur.color;
+            if (cur.put%30 < 2)
+                currentTile.value = 'empty';
+            else
+                currentTile.value = 'dark'+cur.color;
             needUpdate.tile.push({
                 row:    cur.x,
                 col:    cur.y,
@@ -209,6 +215,7 @@ function Player(options){
     var self = this;
     this.x = 0;
     this.y = 0;
+    this.put = 0;
     this.color = '';
     this.dir = 'N';
     this.alive = false;

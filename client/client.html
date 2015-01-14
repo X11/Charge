@@ -5,7 +5,7 @@
     <title>Charge</title>
     <style>
         * {margin:0;padding:0;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box;}
-        body {background:orange;display:block;width:100%;}
+        body {background:white;display:block;width:100%;}
         header {width:100%;text-align:center;margin:10px 0; font-size:20px;}
         header > h1 {margin:10px;}
         header > h2 {margin:10px;}
@@ -35,15 +35,15 @@
     settings.request = document.querySelector('.connect');
     settings.colors = {
         'empty': '#222',
-        'wall': 'black',
-        'red': 'red',
-        'blue': 'blue',
-        'green': 'green',
-        'orange': 'orange',
-        'darkred': 'darkred',
-        'darkblue': 'darkblue',
-        'darkgreen': 'darkgreen',
-        'darkorange': 'darkorange',
+        'wall': '#000',
+        'red': '#D73C2C',
+        'blue': '#0067B0',
+        'green': '#009C41',
+        'orange': '#E67E22',
+        'darkred': '#870000',
+        'darkblue': '#102770',
+        'darkgreen': '#005C01',
+        'darkorange': '#C86400',
     };
 
     settings.binds = [];
@@ -111,7 +111,7 @@
         
 
         this.socket.on('receive_identifier', function(data){
-            document.body.style.background = data.color;
+            document.body.style.background = settings.colors[data.color];
         });
 
         this.socket.on('updateTiles', function(data){
