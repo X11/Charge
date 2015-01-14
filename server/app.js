@@ -1,11 +1,19 @@
 
 var io = require('socket.io').listen(2424);
 io.set('origins', '*:*');
+
 var Container = require('./container.js');
-var game = new Container.Make(40, 40);
+var game = new Container.Make(50, 50);
+game.spawnpoints = [
+[10, 10, 'S'],
+[40, 40, 'N'],
+[10, 40, 'S'],
+[40, 10, 'N'],
+];
 
 io.sockets.on('connection', function(socket){
     console.log(socket.id);   
+
     socket.on('request_grid', function(){
         console.log(this.id + ' requesting grid layout');
         this.emit('receive_grid', {
@@ -15,7 +23,7 @@ io.sockets.on('connection', function(socket){
     });
 
     socket.on('request_playing', function(){
-        if (game.players.length < 3) {
+        if (game.players.length < 4) {
             console.log(this.id + ' inserted into game queue');
             var player = new Container.Player({socket:this});
             game.players.push(player);

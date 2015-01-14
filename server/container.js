@@ -3,6 +3,7 @@ var colors = [
     'red',
     'blue',
     'green',
+    'orange',
 ]
 
 var Tile = function(value){
@@ -15,6 +16,7 @@ var Game = function (rows, cols){
     this.cols = cols;
     this.players = [];
     this.grid = [[],[]];
+    this.spawnpoints = [];
     this.triggers = {
         'onPlayerDead': function(){},
         'onGameStart': function(){},
@@ -68,20 +70,17 @@ var Game = function (rows, cols){
 
         for (i=0;i<l;i++){
             var cur = this.players[i];
-            if (l == 3 && i == 0){
-                cur.x = Math.floor(this.rows/2);
-                cur.y = Math.floor(this.rows/3);
-                this.dir = 'S';
-            } else {
-                var add = 1;
-                if (l==3)
-                    add = 0;
-                cur.x = Math.floor(this.rows/3*2);
-                cur.y = Math.floor(this.rows/3*(i+add));
-            }
+            cur.x = this.spawnpoints[i][0];
+            cur.y = this.spawnpoints[i][1];
+            cur.dir = this.spawnpoints[i][2];
             cur.alive = true;
             cur.color = colors[i];
             this.grid[cur.x][cur.y].value = cur.socket.id;
+            needUpdate.tile.push({
+                row : cur.x,
+                col : cur.y,
+                value : cur.color,
+            });
         }
 
         this.playing = true;
