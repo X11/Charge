@@ -43,7 +43,7 @@ io.sockets.on('connection', function(socket){
 
 });
 
-var refresh_rate = 100;
+var refresh_rate = 60;
 var refresh_timer = null;
 var checkForStart = null;
 function lobbyStart(){
@@ -55,6 +55,7 @@ function lobbyStart(){
     }, 5000);
 }
 game.on('onPlayerDead', function(player){
+    console.log(player.color, 'dead');
     //console.log(this.players);
 });
 

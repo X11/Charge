@@ -19,8 +19,8 @@
 <body>
     <header>
         <h1>CHARGE</h1>
-        <h2 class="status">CONNECTING..</h2>
         <a class='connect' href="#">REQUEST TO PLAY</a>
+        <h2 class="status">CONNECTING..</h2>
     </header>
     <div class="area">
     
@@ -79,7 +79,7 @@
         this.grid = [];
         // Listen to all events
         this.socket.on('receive_grid', function(data){
-            console.log(data.rows, data.cols);
+            //console.log(data.rows, data.cols);
             var r;
             var c;
             for (r=0;r<data.rows;r++){
@@ -100,13 +100,8 @@
 
         this.socket.on('receive_status', function(data){
             self.status = data.status || '';
-            if (self.status == 'ended')
-                self.status = '';
-
-            if (self.status == '' || self.status == 'ended')
-                settings.request.style.display = 'inline-block';
-            else 
-                settings.request.style.display = 'none';
+            //if (self.status == 'ended')
+                //self.status = '';
 
             if (self.status == 'countdown')
                 self.dir = 'N';
@@ -120,7 +115,7 @@
         });
 
         this.socket.on('updateTiles', function(data){
-            console.log(data);
+            //console.log(data);
             for (var i=0;i<data.tile.length;i++){
                 var tile = data.tile[i];
                 var color = (settings.colors[tile.value]) ? settings.colors[tile.value] : 'white';
@@ -142,7 +137,7 @@
         }
 
         this.requestPlaying = function(){
-            console.log(this.status);
+            //console.log(this.status);
             if (this.status == '' || this.status == 'ended')
                 this.socket.emit('request_playing');
         };
