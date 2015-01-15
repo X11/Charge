@@ -1,10 +1,40 @@
-
+/*
 var colors = [
     'red',
     'blue',
     'green',
     'orange',
 ]
+*/
+
+var colors = {
+    'red': null,
+    'blue': null,
+    'violet': null,
+    'green': null,
+    'orange': null,
+    'goldenrod': null,
+};
+
+module.exports.getFreeColors = function(){
+    var free = [];
+    for (i in colors)
+        if (colors[i] == null)
+            free.push(i);
+    return free;
+}
+
+module.exports.linkPlayerToColor = function(color, player){
+    if (colors[color] == null)
+        colors[color] = player;
+    else
+        return false;
+    return true;
+}
+
+module.exports.unlinkColor = function(color){
+    colors[color] = null;
+}
 
 var Tile = function(value){
     this.value = value;
@@ -75,7 +105,7 @@ var Game = function (rows, cols){
             cur.y = this.spawnpoints[i][1];
             cur.dir = this.spawnpoints[i][2];
             cur.alive = true;
-            cur.color = colors[i];
+            //cur.color = colors[i];
             this.grid[cur.x][cur.y].value = cur.socket.id;
             needUpdate.tile.push({
                 row : cur.x,
@@ -86,7 +116,6 @@ var Game = function (rows, cols){
 
         this.playing = true;
         for (i in this.players){
-            this.players[i].socket.emit('receive_identifier', {color: this.players[i].color});
             this.players[i].socket.emit('receive_status', {status: 'countdown'});
             this.players[i].socket.emit('updateTiles', needUpdate);
         }
@@ -96,7 +125,7 @@ var Game = function (rows, cols){
             for (i in self.players){
                 self.players[i].socket.emit('receive_status', {status: 'started'});
             }
-        }, 3000);
+        }, 5000);
     }
 
     this.move = function(){
@@ -121,17 +150,20 @@ var Game = function (rows, cols){
                     newPos[1]-=1;
                     break;
             }
-            if (this.checkCollision(newPos)){
+            var reason = this.checkCollision(newPos)
+            if (reason != false){
                 // Player will die
                 cur.alive = false;
                 cur.socket.emit('receive_status', {status: 'dead'});
-                this.triggers['onPlayerDead'](cur);
+                if (reason.match(/^dark/))
+                    reason = reason.replace(/^dark/, '');
+                this.triggers['onPlayerDead'](cur, reason);
                 continue;
             }
             cur.put++;
-            console.log(cur.socket.id, ' moving ', newPos);
+            //console.log(cur.socket.id, ' moving ', newPos);
             //currentTile.value = 'wall';
-            if (cur.put%30 < 2)
+            if (cur.put%30 < 10)
                 currentTile.value = 'empty';
             else
                 currentTile.value = 'dark'+cur.color;
@@ -158,7 +190,7 @@ var Game = function (rows, cols){
     this.checkCollision = function(pos){
         if(this.grid[pos[0]][pos[1]].value == 'empty')
             return false;
-        return true;
+        return this.grid[pos[0]][pos[1]].value;
     }
 
     this.checkGame = function(){
@@ -170,10 +202,15 @@ var Game = function (rows, cols){
 
         if (alive.length <= 1){
             this.playing = false;
+            var winner = 'draw';
             for (i in this.players){
-                this.players[i].socket.emit('receive_status', {status: 'ended'});
+                if (this.players[i].alive){
+                    this.players[i].socket.emit('receive_status', {status: 'winner'});
+                    winner = this.players[i];
+                }else
+                    this.players[i].socket.emit('receive_status', {status: 'ended'});
             }
-            this.triggers['onGameEnd']();
+            this.triggers['onGameEnd'](winner);
         }
     }
 

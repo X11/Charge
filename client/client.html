@@ -24,25 +24,24 @@
 
         header      {width:100%;text-align:center;}
         header h1   {border:2.5px solid #FFF;padding:10px;font-size:125%;margin:10px auto;
-                    background:#3498db;color:#FFF;cursor:pointer;text-align:center;width:100%;max-width:200px;}
+                    background:rgba(0,0,0,0);;color:#FFF;cursor:pointer;text-align:center;width:100%;max-width:200px;}
         
         header h1:hover
-                    {background:#FFF;color:#3498db}
+                    {background:#FFF;color:#333}
         header p    {font-size:125%;font-weight:bold;text-align:center;margin:10px 0px;}
 
         header span {border-bottom:2.5px solid #FFF;text-align:center;font-weight:normal;}
-        .area {display:table; float:left; margin:0px 25px 50px 25px;height:100%;}
+        .area {display:table; float:left; margin:0px auto 50px auto; padding: 0 25px; height:100%;}
         .row {display:table;margin:0 auto;}
         .col {float:left;display:block;height:10px;width:10px;background:black;}
         
-        .chat {display:table;float:left;width:200px;max-width:200px;}
+        .chat {height:100%;background:rgba(0,0,0,0.2);display:table;float:left;width:200px;max-width:200px;}
 
-        .chat .msges {min-height:625px;max-height:625px;background:}
-        .chat .field .input-field {border:none;border:2.5px solid #FFF;font-size:125%;padding:10px;
-                                    margin-top:25px;background:#FFF;color:#3498db}
-        .chat .msg {width:100%;}
-        .chat .msg-name {}
-        .chat .msg-content {}
+        .chat .msges {display:block; max-height:700px;overflow:auto; overflow-x:hidden;}
+        .chat .field .input-field {border:none;border:2.5px solid #FFF;font-size:125%;padding:10px;margin-bottom:10px;background:#FFF;color:#333;}
+        .chat .msg {width:220px;padding:10px; 5px;display:block;}
+        .chat .username {display:block;}
+        .chat .message {display:block;}
 
     </style>
 </head>
@@ -51,39 +50,13 @@
         <h1 class="tra connect" href="#">Request to play</h1>
         <p>Status: <span class="status">CONNECTING...</span></p>
     </header>
-    
     <div class="container">
         <div class="area"></div>
         <div class="chat">
+            <form action="" class="field">
+                <input type="text" value="" placeholder="Message.." class="input-field">
+            </form>
             <div class="msges">
-                <div class="msg">
-                    <p>
-                        <span class="username">Nigger</span>:
-                        <span class="message">WowWoWowWow</span>
-                    </p>
-                </div>
-                <div class="msg">
-                    <p>
-                        <span class="username">Nigger</span>:
-                        <span class="message">Wow</span>
-                    </p>
-                </div>
-                <div class="msg">
-                    <p>
-                        <span class="username">Nigger</span>:
-                        <span class="message">Wow</span>
-                    </p>
-                </div>
-                <div class="msg">
-                    <p>
-                        <span class="username">Nigger</span>:
-                        <span class="message">Wow</span>
-                    </p>
-                </div>
-            </div>
-
-            <div class="field">
-                <input type="text" class="input-field">
             </div>
         </div>
     </div>
@@ -91,10 +64,14 @@
     <script src="https://cdn.socket.io/socket.io-1.2.1.js"></script>
     <script>
     var settings = {};
-    settings.socket = io.connect('http://172.17.51.96:2424');
+    //settings.socket = io.connect('http://172.17.51.96:2424');
+    settings.socket = io.connect('http://localhost:2424');
     settings.game = new Game(settings.socket);
     settings.status = document.querySelector('.status');
     settings.status.innerHTML = 'CONNECTED';
+    settings.chat = document.querySelector('.msges');
+    settings.form = document.querySelector('.field');
+    settings.input = document.querySelector('.input-field');
     settings.request = document.querySelector('.connect');
     settings.colors = {
         'empty': '#222',
@@ -134,6 +111,22 @@
         settings.game.requestPlaying();
     }
 
+    settings.form.onsubmit = function(e){
+        e.preventDefault();
+        var val = settings.input.value;
+        settings.input.value = '';
+        if (! val.match(/^[\s]+$/))
+            settings.socket.emit('send_message', {msg:val});
+    }
+
+    settings.socket.on('on_message', function(data){
+        settings.chat.innerHTML = '<div class="msg"><p><span class="username">'+data.user+':</span><span class="message">'+data.msg+'</span></p></div>' + settings.chat.innerHTML;
+    })
+
+    settings.socket.on('on_game_message', function(data){
+        settings.chat.innerHTML = '<div class="msg"><p><span class="message">'+data.msg+'</span></p></div>' + settings.chat.innerHTML;
+    })
+
     function Game(socket){
         var self = this;
         this.status = '';
@@ -163,25 +156,23 @@
 
         this.socket.on('receive_status', function(data){
             self.status = data.status || '';
-            //if (self.status == 'ended')
-                //self.status = '';
-
             if (self.status == 'countdown')
                 self.dir = 'N';
+
             settings.status.innerHTML = self.status.toUpperCase();
             console.log(self.status);
         });
         
 
         this.socket.on('receive_identifier', function(data){
-            document.body.style.background = settings.colors[data.color];
+            document.body.style.background = (settings.colors[data.color]) ? settings.colors[data.color] : data.color;
         });
 
         this.socket.on('updateTiles', function(data){
             //console.log(data);
             for (var i=0;i<data.tile.length;i++){
                 var tile = data.tile[i];
-                var color = (settings.colors[tile.value]) ? settings.colors[tile.value] : 'white';
+                var color = (settings.colors[tile.value]) ? settings.colors[tile.value] : tile.value;
                 self.grid[tile.row][tile.col].style.background = color;
             }
         });
@@ -201,7 +192,7 @@
 
         this.requestPlaying = function(){
             //console.log(this.status);
-            if (this.status == '' || this.status == 'ended')
+            if (this.status == '' || this.status == 'ended' || self.status == 'winner')
                 this.socket.emit('request_playing');
         };
 
