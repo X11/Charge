@@ -4,27 +4,90 @@
     <meta charset="utf-8">
     <title>Charge</title>
     <style>
-        * {margin:0;padding:0;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box;}
-        body {background:white;display:block;width:100%;}
-        header {width:100%;text-align:center;margin:10px 0; font-size:20px;}
-        header > h1 {margin:10px;}
-        header > h2 {margin:10px;}
-        header > a { text-decoration:none; display:inline-block; font-weight:bold; background:#000; color:#fff;padding:5px 10px; }
-        .area {display:block; margin:20px 0;}
+        @import url(http://fonts.googleapis.com/css?family=Montserrat);
+
+        *           {margin:0;padding:0;
+                    box-sizing:border-box;
+                    -moz-box-sizing:border-box;
+                    -webkit-box-sizing:border-box;
+                    font-family: 'Montserrat', sans-serif;}
+
+        body        {background:#3498db;display:block;width:100%;height:100%;
+                    font-family: 'Montserrat', sans-serif;color:white;}
+
+        .tra        {transition:background .3s, color .3s;
+                    -webkit-transition:background .3s, color .3s;}
+        
+        a           {color:inherit;text-decoration:none;}
+
+        .container  {display:table; margin:0 auto;}
+
+        header      {width:100%;text-align:center;}
+        header h1   {border:2.5px solid #FFF;padding:10px;font-size:125%;margin:10px auto;
+                    background:#3498db;color:#FFF;cursor:pointer;text-align:center;width:100%;max-width:200px;}
+        
+        header h1:hover
+                    {background:#FFF;color:#3498db}
+        header p    {font-size:125%;font-weight:bold;text-align:center;margin:10px 0px;}
+
+        header span {border-bottom:2.5px solid #FFF;text-align:center;font-weight:normal;}
+        .area {display:table; float:left; margin:0px 25px 50px 25px;height:100%;}
         .row {display:table;margin:0 auto;}
         .col {float:left;display:block;height:10px;width:10px;background:black;}
+        
+        .chat {display:table;float:left;width:200px;max-width:200px;}
+
+        .chat .msges {min-height:625px;max-height:625px;background:}
+        .chat .field .input-field {border:none;border:2.5px solid #FFF;font-size:125%;padding:10px;
+                                    margin-top:25px;background:#FFF;color:#3498db}
+        .chat .msg {width:100%;}
+        .chat .msg-name {}
+        .chat .msg-content {}
 
     </style>
 </head>
 <body>
     <header>
-        <h1>CHARGE</h1>
-        <a class='connect' href="#">REQUEST TO PLAY</a>
-        <h2 class="status">CONNECTING..</h2>
+        <h1 class="tra connect" href="#">Request to play</h1>
+        <p>Status: <span class="status">CONNECTING...</span></p>
     </header>
-    <div class="area">
     
+    <div class="container">
+        <div class="area"></div>
+        <div class="chat">
+            <div class="msges">
+                <div class="msg">
+                    <p>
+                        <span class="username">Nigger</span>:
+                        <span class="message">WowWoWowWow</span>
+                    </p>
+                </div>
+                <div class="msg">
+                    <p>
+                        <span class="username">Nigger</span>:
+                        <span class="message">Wow</span>
+                    </p>
+                </div>
+                <div class="msg">
+                    <p>
+                        <span class="username">Nigger</span>:
+                        <span class="message">Wow</span>
+                    </p>
+                </div>
+                <div class="msg">
+                    <p>
+                        <span class="username">Nigger</span>:
+                        <span class="message">Wow</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="field">
+                <input type="text" class="input-field">
+            </div>
+        </div>
     </div>
+
     <script src="https://cdn.socket.io/socket.io-1.2.1.js"></script>
     <script>
     var settings = {};
