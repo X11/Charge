@@ -58,31 +58,6 @@
                 <input type="text" value="" placeholder="Message.." class="input-field">
             </form>
             <div class="msges">
-                <div class="msg">
-                <p>
-                    <span class="username">'+data.user+':</span>
-                    <span class="message">'+data.msg+'</span>
-                </p>
-                </div>
-                <div class="msg">
-                <p>
-                    <span class="username">'+data.user+':</span>
-                    <span class="message">'+data.msg+'</span>
-                </p>
-                </div>
-                <div class="msg">
-                <p>
-                    <span class="username">'+data.user+':</span>
-                    <span class="message">'+data.msg+'</span>
-                </p>
-
-                </div>
-
-                <div class="msg">
-            <p>
-            <span class="system-message">'+data.msg+'</span>
-            </p>
-            </div>
             </div>
         </div>
     </div>
@@ -146,20 +121,11 @@
     }
 
     settings.socket.on('on_message', function(data){
-        settings.chat.innerHTML = '<div class="msg">
-            <p>
-            <span class="username">'+data.user+':</span>
-            <span class="message">"'+data.msg+'"</span>
-            </p>
-            </div>' + settings.chat.innerHTML;
+        settings.chat.innerHTML = '<div class="msg"><p><span class="username">'+data.user+':</span><span class="message">"'+data.msg+'"</span></p></div>' + settings.chat.innerHTML;
     })
 
     settings.socket.on('on_game_message', function(data){
-        settings.chat.innerHTML = '<div class="msg">
-            <p>
-            <span class="system-message">'+data.msg+'</span>
-            </p>
-            </div>' + settings.chat.innerHTML;
+        settings.chat.innerHTML = '<div class="msg"><p><span class="system-message">'+data.msg+'</span></p></div>' + settings.chat.innerHTML;
     })
 
     function Game(socket){

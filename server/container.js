@@ -14,6 +14,9 @@ var colors = {
     'green': null,
     'orange': null,
     'goldenrod': null,
+    'cyan': null,
+    'salmon': null,
+    'turquoise': null,
 };
 
 module.exports.getFreeColors = function(){

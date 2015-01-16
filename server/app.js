@@ -6,43 +6,20 @@ var Container = require('./container.js');
 var game = new Container.Make(70, 70);
 game.spawnpoints = [
     [10, 10, 'S'],
-    [40, 40, 'N'],
-    [10, 40, 'S'],
-    [40, 10, 'N'],
+    [60, 60, 'N'],
+    [10, 60, 'S'],
+    [60, 10, 'N'],
+
+    [30, 30, 'N'],
+    [40, 40, 'S'],
+    [30, 40, 'N'],
+    [40, 30, 'S'],
 ];
 var players = [];
 
 
 function convertHtmlToText(returnText) {
-    //-- remove BR tags and replace them with line break
-    returnText=returnText.replace(/<br>/gi, "\n");
-    returnText=returnText.replace(/<br\s\/>/gi, "\n");
-    returnText=returnText.replace(/<br\/>/gi, "\n");
-
-    //-- remove P and A tags but preserve what's inside of them
-    returnText=returnText.replace(/<p.*>/gi, "\n");
-    returnText=returnText.replace(/<a.*href="(.*?)".*>(.*?)<\/a>/gi, " $2 ($1)");
-    returnText=returnText.replace(/<h.*>(.*?)<\/a>/gi, " $2 ($1)");
-
-    //-- remove all inside SCRIPT and STYLE tags
-    returnText=returnText.replace(/<script.*>[\w\W]{1,}(.*?)[\w\W]{1,}<\/script>/gi, "");
-    returnText=returnText.replace(/<style.*>[\w\W]{1,}(.*?)[\w\W]{1,}<\/style>/gi, "");
-    //-- remove all else
-    returnText=returnText.replace(/<(?:.|\s)*?>/g, "");
-
-    //-- get rid of more than 2 multiple line breaks:
-    returnText=returnText.replace(/(?:(?:\r\n|\r|\n)\s*){2,}/gim, "\n\n");
-
-    //-- get rid of more than 2 spaces:
-    returnText = returnText.replace(/ +(?= )/g,'');
-
-    //-- get rid of html-encoded characters:
-    returnText=returnText.replace(/&nbsp;/gi," ");
-    returnText=returnText.replace(/&amp;/gi,"&");
-    returnText=returnText.replace(/&quot;/gi,'"');
-    returnText=returnText.replace(/&lt;/gi,'<');
-    returnText=returnText.replace(/&gt;/gi,'>');
-
+    returnText = returnText.replace(/(<([^>]+)>)/ig,"");
     //-- return
     return returnText;
 }
@@ -92,9 +69,9 @@ io.sockets.on('connection', function(socket){
     
     socket.on('send_message', function (data) {
         var user = players[this.id].color;
-        data,msg = convertHtmlToText(data.msg);
+        var msg = convertHtmlToText(data.msg);
         for (i in players)
-            players[i].socket.emit('on_message', {user: user, msg: data.msg});
+            players[i].socket.emit('on_message', {user: user, msg: msg});
         console.log(user, data.msg);
     });
 });
