@@ -46,7 +46,7 @@ io.sockets.on('connection', function(socket){
     });
 
     socket.on('request_playing', function(){
-        if (game.players.length < 4) {
+        if (game.players.length < 8) {
             console.log(this.id + ' inserted into game queue');
             game.players.push(players[this.id]);
             this.emit('receive_status', {status: 'waiting'});
