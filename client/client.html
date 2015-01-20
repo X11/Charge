@@ -66,8 +66,12 @@
     <script src="https://cdn.socket.io/socket.io-1.2.1.js"></script>
     <script>
     var settings = {};
-    settings.socket = io.connect('http://172.17.51.96:2424');
+    var audio = new Audio();
+    audio.muted = (location.hash == "#muted") ? true : false;
+    audio.src = "http://dofusomax.jimdo.com/app/download/5643300417/514fb35c/6b755020fc082bd01c365a0c2a71d6f709d962df/Nightcore%20-%20Cocaine.mp3";
+    //settings.socket = io.connect('http://172.17.51.96:2424');
     //settings.socket = io.connect('http://localhost:2424');
+    settings.socket = io.connect('http://172.17.20.46:2424');
     settings.game = new Game(settings.socket);
     settings.status = document.querySelector('.status');
     settings.status.innerHTML = 'CONNECTED';
@@ -158,8 +162,12 @@
 
         this.socket.on('receive_status', function(data){
             self.status = data.status || '';
-            if (self.status == 'countdown')
+            if (self.status == 'countdown'){
                 self.dir = 'N';
+                audio.play();
+            }
+            if (self.status == 'ended')
+                audio.pause();
 
             settings.status.innerHTML = self.status.toUpperCase();
             console.log(self.status);
@@ -167,6 +175,7 @@
         
 
         this.socket.on('receive_identifier', function(data){
+            data.color = 'dark' + data.color;
             document.body.style.background = (settings.colors[data.color]) ? settings.colors[data.color] : data.color;
         });
 
