@@ -46,14 +46,19 @@ io.sockets.on('connection', function(socket){
     });
 
     socket.on('request_playing', function(){
-        if (game.players.length < 8) {
-            console.log(this.id + ' inserted into game queue');
-            game.players.push(players[this.id]);
-            this.emit('receive_status', {status: 'waiting'});
-        } else {
+        if (game.players.length >= 8) {
             console.log(this.id + ' denied from game queue');
             this.emit('receive_status', {status: 'To many players'});
+            return;
         }
+        if (this.playing) {
+            console.log(this.id + ' denied from game queue');
+            this.emit('receive_status', {status: 'Game already started'});
+            return;
+        }
+        console.log(this.id + ' inserted into game queue');
+        game.players.push(players[this.id]);
+        this.emit('receive_status', {status: 'waiting'});
     });
     
     socket.on('disconnect', function(){

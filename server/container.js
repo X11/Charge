@@ -1,12 +1,5 @@
-/*
-var colors = [
-    'red',
-    'blue',
-    'green',
-    'orange',
-]
-*/
 
+// All colors avaible to assign to a player
 var colors = {
     'red': null,
     'blue': null,
@@ -19,6 +12,7 @@ var colors = {
     'turquoise': null,
 };
 
+// Return all free colors 
 module.exports.getFreeColors = function(){
     var free = [];
     for (i in colors)
@@ -27,6 +21,7 @@ module.exports.getFreeColors = function(){
     return free;
 }
 
+// Assigns a player to a specific color
 module.exports.linkPlayerToColor = function(color, player){
     if (colors[color] == null)
         colors[color] = player;
@@ -35,21 +30,28 @@ module.exports.linkPlayerToColor = function(color, player){
     return true;
 }
 
+// Frees a specific color
 module.exports.unlinkColor = function(color){
     colors[color] = null;
 }
 
+// Nothing more then a small container with its value
 var Tile = function(value){
     this.value = value;
 }
 
+// The game object himself
 var Game = function (rows, cols){
     var self = this;   
     this.rows = rows;
     this.cols = cols;
+    // All queued players
     this.players = [];
+    // The grid or playing field
     this.grid = [[],[]];
+    // Spawnpoints MUST be assigned
     this.spawnpoints = [];
+    // All events to handle
     this.triggers = {
         'onPlayerDead': function(){},
         'onGameStart': function(){},
@@ -57,13 +59,15 @@ var Game = function (rows, cols){
     };
     this.playing = false;
     
+    // Init the grid with the given size
     for (r=0;r<rows;r++){
         this.grid[r] = [];
-        for (c=0;c<cols;c++){
+        for (c=0;c<cols;c++)
             this.grid[r][c] = new Tile('empty');
-        }
+        
     }
     
+    // Check weather the socket.id is a player
     this.isPlayer = function(id){
         for (i in this.players)
             if (this.players[i].socket.id == id)
@@ -71,6 +75,7 @@ var Game = function (rows, cols){
         return false;
     }
 
+    // Removes a player with a socket id
     this.removePlayer = function(id){
         var index = null;
         for (i in this.players)
@@ -81,6 +86,9 @@ var Game = function (rows, cols){
         return false;
     }
 
+    // Method to start a round of the game
+    // Will reset eveything
+    // and send a notice to the player that the round is starting
     this.start = function(){
         var i;
         var l = this.players.length;
@@ -101,6 +109,7 @@ var Game = function (rows, cols){
             }
         }
 
+        // The spawnpoints to spawn the players
         for (i=0;i<l;i++){
             var cur = this.players[i];
             cur.put = 0;
@@ -117,12 +126,14 @@ var Game = function (rows, cols){
             });
         }
 
+        // Send it to all players who are in queue
         this.playing = true;
         for (i in this.players){
             this.players[i].socket.emit('receive_status', {status: 'countdown'});
             this.players[i].socket.emit('updateTiles', needUpdate);
         }
 
+        // Handle the countdown
         setTimeout(function(){
             self.triggers['onGameStart']();           
             for (i in self.players){
@@ -131,9 +142,13 @@ var Game = function (rows, cols){
         }, 5000);
     }
 
+    // This renders the play field
     this.move = function(){
+        // All tiles which will change value
         var needUpdate = {tile:[]};
+        // Loop thru all players to get there new tile
         for (i in this.players){
+            
             var cur = this.players[i];
             if (cur.alive == false) continue;
 
@@ -153,10 +168,12 @@ var Game = function (rows, cols){
                     newPos[1]-=1;
                     break;
             }
+            // Check for collision,
             var reason = this.checkCollision(newPos)
             if (reason != false){
                 // Player will die
                 cur.alive = false;
+                // Send a status to the player that he no longer plays
                 cur.socket.emit('receive_status', {status: 'dead'});
                 if (reason.match(/^dark/))
                     reason = reason.replace(/^dark/, '');
@@ -164,12 +181,12 @@ var Game = function (rows, cols){
                 continue;
             }
             cur.put++;
-            //console.log(cur.socket.id, ' moving ', newPos);
-            //currentTile.value = 'wall';
+            // GAPS :D
             if (cur.put%30 < 10)
                 currentTile.value = 'empty';
             else
                 currentTile.value = 'dark'+cur.color;
+            // old tile gets a darker color
             needUpdate.tile.push({
                 row:    cur.x,
                 col:    cur.y,
@@ -178,45 +195,52 @@ var Game = function (rows, cols){
             cur.x = newPos[0];
             cur.y = newPos[1];
             this.grid[cur.x][cur.y].value = cur.color;
+            // new tile gets the players color
             needUpdate.tile.push({
                 row:    cur.x,
                 col:    cur.y,
                 value:  cur.color,
             });
         }
-        for (i in this.players){
+        // Send the updated titles to all players
+        for (i in this.players)
             this.players[i].socket.emit('updateTiles', needUpdate);
-        }
         this.checkGame();
     }
-
+    
+    // Method to check for collision
+    // Returns false or the value of the tile
     this.checkCollision = function(pos){
         if(this.grid[pos[0]][pos[1]].value == 'empty')
             return false;
         return this.grid[pos[0]][pos[1]].value;
     }
-
+    
+    // Function to check weather the game ended due to conditions
     this.checkGame = function(){
         // check playeras
         var alive = [];
         for (i in this.players)
             if (this.players[i].alive)
                 alive.push(1);
-
-        if (alive.length <= 1){
+        
+        // Is there are less then 2 players
+        if (alive.length < 2){
             this.playing = false;
             var winner = 'draw';
             for (i in this.players){
+                // if the player is alive he is obviously the winner Give him some credit :-)
                 if (this.players[i].alive){
                     this.players[i].socket.emit('receive_status', {status: 'winner'});
                     winner = this.players[i];
-                }else
+                } else
                     this.players[i].socket.emit('receive_status', {status: 'ended'});
             }
             this.triggers['onGameEnd'](winner);
         }
     }
-
+    
+    // Method to display updating grid to console (Used for testing purposes)
     this.print = function(){
         for (var r = 0; r < this.grid.length; r++){
             var p = '';
@@ -245,12 +269,14 @@ var Game = function (rows, cols){
         }
     }
 
+    // Assign callbacks
     this.on = function(on, callback){
         this.triggers[on] = callback.bind(this);
     }
 
 }
 
+// Player object storing values and handling direction changes
 function Player(options){
     var self = this;
     this.x = 0;
@@ -266,5 +292,6 @@ function Player(options){
     });
 }
 
+// Export the modules
 module.exports.Make = Game;
 module.exports.Player = Player;
