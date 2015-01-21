@@ -48,6 +48,7 @@ settings.opposite['W'] = 'E';
 
 settings.request.onclick = function(e){
     e.preventDefault();
+    if (!settings.game) return false;
     settings.game.requestPlaying();
 }
 
