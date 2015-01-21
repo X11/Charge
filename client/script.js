@@ -1,13 +1,14 @@
 var settings = {};
 var audio = new Audio();
+var ip = 'http://localhost:2424';
 audio.muted = (location.hash == "#sound") ? false : true;
 audio.src = "http://dofusomax.jimdo.com/app/download/5643300417/514fb35c/6b755020fc082bd01c365a0c2a71d6f709d962df/Nightcore%20-%20Cocaine.mp3";
-//settings.socket = io.connect('http://172.17.51.96:2424');
-settings.socket = io.connect('http://localhost:2424');
-//settings.socket = io.connect('http://172.17.20.46:2424');
-settings.game = new Game(settings.socket);
+settings.socket = io.connect(ip, {reconnect:false});
 settings.status = document.querySelector('.status');
-settings.status.innerHTML = 'CONNECTED';
+settings.socket.on('connect', function(){
+    settings.game = new Game(settings.socket);
+    settings.status.innerHTML = 'CONNECTED';
+});
 settings.chat = document.querySelector('.msges');
 settings.form = document.querySelector('.field');
 settings.input = document.querySelector('.input-field');

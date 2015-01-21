@@ -295,7 +295,7 @@ function Player(options){
     this.socket = options.socket;
 
     this.socket.on('changeDirection', function(data){
-        if (settings.opposite[data.direction] == self.dir)
+        if (opposite[data.direction] == self.dir)
             return
         self.dir = data.direction;
     });
