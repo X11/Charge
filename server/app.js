@@ -110,7 +110,7 @@ game.on('onGameStart', function(){
 
 game.on('onGameEnd', function(winner){
     clearInterval(refresh_timer);
-    var message = (winner == 'draw') ? 'Game ended in a draw' : winner.color + ' have won the game!';
+    var message = (winner == 'draw') ? 'Game ended in a draw' : winner.color + ' has won the game!';
     for (i in players)
         players[i].socket.emit('on_game_message', {msg: message});
     game.players = [];
