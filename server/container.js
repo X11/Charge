@@ -32,6 +32,7 @@ module.exports.linkPlayerToColor = function(color, player){
 
 // Frees a specific color
 module.exports.unlinkColor = function(color){
+    if (!color) return false;
     colors[color] = null;
 }
 
@@ -182,7 +183,7 @@ var Game = function (rows, cols){
             }
             cur.put++;
             // GAPS :D
-            if (cur.put%30 < 10)
+            if (cur.put%40 < 10)
                 currentTile.value = 'empty';
             else
                 currentTile.value = 'dark'+cur.color;
@@ -276,6 +277,12 @@ var Game = function (rows, cols){
 
 }
 
+opposite = [];
+opposite['N'] = 'S';
+opposite['S'] = 'N';
+opposite['E'] = 'W';
+opposite['W'] = 'E';
+
 // Player object storing values and handling direction changes
 function Player(options){
     var self = this;
@@ -288,6 +295,8 @@ function Player(options){
     this.socket = options.socket;
 
     this.socket.on('changeDirection', function(data){
+        if (settings.opposite[data.direction] == self.dir)
+            return
         self.dir = data.direction;
     });
 }

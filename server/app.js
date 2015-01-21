@@ -56,9 +56,12 @@ io.sockets.on('connection', function(socket){
             this.emit('receive_status', {status: 'Game already started'});
             return;
         }
+        if (!players[this.id].color){
+            return;
+        };
         console.log(this.id + ' inserted into game queue');
         game.players.push(players[this.id]);
-        this.emit('receive_status', {status: 'waiting'});
+        this.emit('receive_status', {status: 'queue'});
     });
     
     socket.on('disconnect', function(){
