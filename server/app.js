@@ -1,6 +1,16 @@
-
-var io = require('socket.io').listen(2424);
+var express = require('express');
+var app = express();
+var server = require('http').createServer(app);
+var io = require('socket.io')(server);
+server.listen(3000);
 io.set('origins', '*:*');
+
+app.set("view options", {layout: false});
+app.use(express.static(__dirname + '/../client'));
+
+app.get('/', function(req, res){
+    res.send('index.html');
+});
 
 var Container = require('./container.js');
 var game = new Container.Make(70, 70);
