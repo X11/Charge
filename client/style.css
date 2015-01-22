@@ -29,7 +29,7 @@ h2:hover    {background:#fff;color:#000;}
 header span {border-bottom:2.5px solid #FFF;text-align:center;font-weight:normal;}
 .area {display:table; float:left; margin:0px auto 50px auto; padding: 0 25px; height:100%;}
 .row {display:table;margin:0 auto;}
-.col {float:left;display:block;height:Calc((100vw - 400px) / 70);width:Calc((100vw - 400px) / 70);background:black;}
+.col {float:left;display:block;height:5px;width:5px;background:black;}
 
 .chat {position:fixed;top:0;right:0;height:100%;background:rgba(33,33,33,0.2);display:table;float:left;max-width:270px;}
 

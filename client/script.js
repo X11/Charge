@@ -1,6 +1,7 @@
 var settings = {};
 var audio = new Audio();
-var ip = 'http://localhost:3000';
+//var ip = 'http://localhost:3000';
+var ip = 'http://172.17.51.96:3000';
 audio.muted = (location.hash == "#sound") ? false : true;
 audio.src = "http://dofusomax.jimdo.com/app/download/5643300417/514fb35c/6b755020fc082bd01c365a0c2a71d6f709d962df/Nightcore%20-%20Cocaine.mp3";
 settings.socket = io.connect(ip, {reconnect:false});
