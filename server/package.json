@@ -1,0 +1,16 @@
+{
+  "name": "Charge",
+  "version": "0.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "express": "~4.11.1",
+    "socket.io": "~1.2.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Terence Keur",
+  "license": "BSD"
+}

@@ -3,7 +3,7 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 server.listen(3000);
-io.set('origins', '*:*');
+io.set('origins', '*:3000');
 
 app.set("view options", {layout: false});
 app.use(express.static(__dirname + '/../client'));
@@ -19,7 +19,6 @@ game.spawnpoints = [
     [60, 60, 'N'],
     [10, 60, 'S'],
     [60, 10, 'N'],
-
     [30, 30, 'N'],
     [40, 40, 'S'],
     [30, 40, 'N'],
@@ -61,7 +60,7 @@ io.sockets.on('connection', function(socket){
             this.emit('receive_status', {status: 'To many players'});
             return;
         }
-        if (this.playing) {
+        if (game.playing) {
             console.log(this.id + ' denied from game queue');
             this.emit('receive_status', {status: 'Game already started'});
             return;

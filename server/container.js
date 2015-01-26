@@ -93,6 +93,7 @@ var Game = function (rows, cols){
     this.start = function(){
         var i;
         var l = this.players.length;
+        this.playing = true;
         var needUpdate = {tile:[]};
         
         for (r=0;r<this.rows;r++){
@@ -128,7 +129,6 @@ var Game = function (rows, cols){
         }
 
         // Send it to all players who are in queue
-        this.playing = true;
         for (i in this.players){
             this.players[i].socket.emit('receive_status', {status: 'countdown'});
             this.players[i].socket.emit('updateTiles', needUpdate);
