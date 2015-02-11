@@ -12,7 +12,7 @@ app.get('/', function(req, res){
     res.send('index.html');
 });
 
-var Container = require('./container.js');
+var Container = require('./namespace.js');
 var game = new Container.Make(70, 70);
 game.spawnpoints = [
     [10, 10, 'S'],

@@ -1,42 +1,3 @@
-// Split this file into multiple ones.
-
-// All colors avaible to assign to a player
-var colors = {
-    'red': null,
-    'blue': null,
-    'violet': null,
-    'green': null,
-    'orange': null,
-    'goldenrod': null,
-    'cyan': null,
-    'salmon': null,
-    'turquoise': null,
-};
-
-// Return all free colors 
-module.exports.getFreeColors = function(){
-    var free = [];
-    for (i in colors)
-        if (colors[i] == null)
-            free.push(i);
-    return free;
-}
-
-// Assigns a player to a specific color
-module.exports.linkPlayerToColor = function(color, player){
-    if (colors[color] == null)
-        colors[color] = player;
-    else
-        return false;
-    return true;
-}
-
-// Frees a specific color
-module.exports.unlinkColor = function(color){
-    if (!color) return false;
-    colors[color] = null;
-}
-
 // Nothing more then a small container with its value
 var Tile = function(value){
     this.value = value;
@@ -281,30 +242,4 @@ var Game = function (rows, cols){
 
 }
 
-opposite = [];
-opposite['N'] = 'S';
-opposite['S'] = 'N';
-opposite['E'] = 'W';
-opposite['W'] = 'E';
-
-// Player object storing values and handling direction changes
-function Player(options){
-    var self = this;
-    this.x = 0;
-    this.y = 0;
-    this.put = 0;
-    this.color = '';
-    this.dir = 'N';
-    this.alive = false;
-    this.socket = options.socket;
-
-    this.socket.on('changeDirection', function(data){
-        if (opposite[data.direction] == self.dir)
-            return
-        self.dir = data.direction;
-    });
-}
-
-// Export the modules
-module.exports.Make = Game;
-module.exports.Player = Player;
+module.exports = Game;
