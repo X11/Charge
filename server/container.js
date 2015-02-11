@@ -1,3 +1,4 @@
+// Split this file into multiple ones.
 
 // All colors avaible to assign to a player
 var colors = {
@@ -42,6 +43,9 @@ var Tile = function(value){
 }
 
 // The game object himself
+// Needs to be redone
+// - Events - Inherit from EventEmitter instead of using this one
+// - Use forEach function instead of looping thru it
 var Game = function (rows, cols){
     var self = this;   
     this.rows = rows;
